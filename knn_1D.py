@@ -6,8 +6,8 @@ import matplotlib.pyplot as plt
 
 
 def distance_eucl(donnee, d):
-    """donnée : [x] (pas de prise en compte des y) et d : liste de data de la forme [x, classe], data étant une liste de liste des données déjà traitées et disponibles
-    renvoit pour chaque point du set de donnée la distance au nouveau plot en position x selon
+    """donnée : [y] (pas de prise en compte des x) c'est la distance au radar placé en 0 et d : liste de data de la forme [y, classe], data étant une liste de listes des données déjà traitées et disponibles
+    renvoit pour chaque point du set de donnée la distance au nouveau plot en position y selon
     distance < 0 : le point est plus loin sur l'axe
     distance > 0 : le point est plus proche"""
     distance = 0.0
@@ -16,8 +16,8 @@ def distance_eucl(donnee, d):
 
 
 def trouver_voisins(data, donnee, nb_voisins):
-    """data: liste : ensemble de donnee à tester, d in data est de la forme [x,piste]
-    donnee est la donnée testée de la forme [x]
+    """data: liste : ensemble de donnee à tester, d in data est de la forme [y,piste]
+    donnee est la donnée testée de la forme [y]
     nb_voisins = k = nb de voisins souhaités
     on gère aussi la création d'une nouvelle piste si les distance aux k plus proches voisins sont trop grandes """
     distances = []
@@ -50,8 +50,8 @@ def trouver_voisins(data, donnee, nb_voisins):
 
 
 def prediction_classe(data, donnee, nb_voisins):
-    """data: liste : ensemble de donnee à tester, d in data est de la forme [x,piste]
-        donnee est la donnée testée de la forme [x]
+    """data: liste : ensemble de donnee à tester, d in data est de la forme [y,piste]
+        donnee est la donnée testée de la forme [y]
         nb_voisins = k = nb de voisins souhaités"""
     voisins = trouver_voisins(data, donnee, nb_voisins)
     if not voisins:
@@ -88,6 +88,7 @@ def suivi_1_cible(donnee, piste, k):
         plt.plot(piste[i][0], 'bo', color='blue')
 
     plt.plot(donnee[0], 'bo', color="green", label="plot à tester")
+    plt.plot(radar[0], 'bo', color="yellow", label="radar")
     plt.legend()
     plt.grid()
     plt.xlabel("abs")
@@ -119,6 +120,7 @@ def suivi_1_cible(donnee, piste, k):
         for i in range(1, len(piste)):
             plt.plot(piste[i - 1][0], color='blue')
             plt.plot(piste[i][0], 'bo', color='blue')
+        plt.plot(radar[0], 'bo', color="yellow", label="radar")
         plt.legend()
         plt.grid()
         plt.xlabel("abs")
@@ -138,6 +140,7 @@ def suivi_1_cible(donnee, piste, k):
         print("nouvelle piste:", piste_nvx, "\n piste :", piste)
         print("le nouveau point est à :", distance_cible_radar, "m du radar")
 
+
         # visualisation
         plt.subplot(212)
         plt.plot(piste[0][0], 'bo', color='blue', label="piste")
@@ -145,12 +148,14 @@ def suivi_1_cible(donnee, piste, k):
         for i in range(1, len(piste)):
             plt.plot(piste[i - 1][0], color='blue')
             plt.plot(piste[i][0], 'bo', color='blue')
+        plt.plot(radar[0], 'bo', color="yellow", label="radar")
         plt.legend()
         plt.grid()
         plt.xlabel("abs")
         plt.ylabel("ordonnées")
         plt.title("situation N+1")
 
+    return piste, piste_nvx, distance_donne_precedent
     plt.show()
 
 if __name__ == "__main__":
@@ -171,10 +176,13 @@ if __name__ == "__main__":
                [7, 2],
                [8, 2]]
 
-    piste_3 = [[0, 3],
+    piste_3 = [[0.5, 3],
                [1, 3],
                [1.5, 3],
                [3, 3],
                [4, 3]]
 
-    suivi_1_cible(donnee_eclatee_au_sol, piste_1, 3)
+    piste_1, piste_nvx, distance = suivi_1_cible(donnee_eclatee_au_sol, piste_1, 3)
+    piste_1, piste_nvx, distance = suivi_1_cible(donnee, piste_1, 3)
+    print(piste_1)
+    #print(piste_nvx) :  ne marche pas car écrasé par le deuxième appel de suivi_1_cible -> il faut passer sur un suivi de 2 cibles (if piste_nvx != [] : suivi_2_cible else : on enchaine 
