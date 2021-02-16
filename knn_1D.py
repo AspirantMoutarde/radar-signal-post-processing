@@ -29,7 +29,7 @@ def trouver_voisins(data, donnee, nb_voisins):
     voisins = []
 
     # vérification distances
-    seuil = 2
+    seuil = 5
     cpt = 0
     for i in range(nb_voisins):
         if np.abs(distances[i][1]) > seuil:
@@ -140,7 +140,6 @@ def suivi_1_cible(donnee, piste, k):
         print("nouvelle piste:", piste_nvx, "\n piste :", piste)
         print("le nouveau point est à :", distance_cible_radar, "m du radar")
 
-
         # visualisation
         plt.subplot(212)
         plt.plot(piste[0][0], 'bo', color='blue', label="piste")
@@ -158,8 +157,119 @@ def suivi_1_cible(donnee, piste, k):
     return piste, piste_nvx, distance_donne_precedent
     plt.show()
 
+
+def suivi_2_cible(donnee, k, piste_1, piste_2):
+    """Algo pour suivi de 2 cible
+        entrées :
+        donnee : plot à tester
+        k : nombre de voisins souhaités
+        piste_1 : piste de la première cible
+        piste_2 : piste de la deuxieme cible
+        sortie :
+        pistes 1 et 2 mises à jours et distance du plot au radar et au point précédent de sa piste"""
+
+    data = []
+    nb_piste = 2
+    check = []
+    radar = [0]
+
+    # création du jeu de données sur lequel on applique l'algo knn
+    data.extend(piste_1)
+    data.extend(piste_2)
+
+    check = check + [piste_1] + [piste_2]
+
+    # visualisation situation de depart
+    plt.figure()
+    plt.subplot(211)
+    plt.plot(piste_1[0][0], 'bo', color='blue', label="piste 1")
+    plt.plot(piste_2[0][0], 'bo', color='red', label="piste 2")
+    for i in range(1, len(piste_1)):
+        plt.plot(piste_1[i - 1][0], color='blue')
+        plt.plot(piste_1[i][0], 'bo', color='blue')
+    for i in range(1, len(piste_2)):
+        plt.plot(piste_2[i - 1][0], color='red')
+        plt.plot(piste_2[i][0], 'bo', color='red')
+
+    plt.plot(donnee[0], 'bo', color="green", label="pt à tester")
+    plt.plot(radar[0], 'bo', color="yellow", label="radar")
+
+    plt.legend()
+    plt.grid()
+    plt.xlabel("abs")
+    plt.ylabel("ordonnées")
+    plt.title("situation N")
+    # fin visualisation
+
+    classe_donnee = prediction_classe(data, donnee, k)
+    piste_nvx_2 = []
+    print("le plot appartient à la piste:", classe_donnee)
+
+    if classe_donnee == 100:
+        print("initialisation nouvelle piste")
+        distance_donne_precedent = 0
+        donnee.append(3)
+        piste_nvx_2 = [donnee]
+        print("nouvelle piste:", piste_nvx_2)
+    else:
+        piste_nvx_2 = []
+
+    # ajout à la piste correspondante et mise à jour des pistes
+    for i in range(1, nb_piste + 1):
+        if classe_donnee == i:
+            # on ajoute le point à la piste correspondante
+            donnee.append(classe_donnee)
+            check[i - 1].append(donnee)
+            distance_donne_precedent = distance_eucl(donnee, check[i - 1][-2])
+            print(check)
+
+    piste_1 = check[0]
+    piste_2 = check[1]
+
+    print("piste 1 :", piste_1)
+    print("piste 2 :", piste_2)
+
+    distance_cible_radar = distance_eucl(donnee, radar)
+
+    print("le nouveau point est à :", distance_cible_radar, "m du radar")
+    print("le point c'est déplacé de:", distance_donne_precedent,
+          "m entre son emplacement précédent et son emplacement actuel")
+
+    # visualisation après méthode des knn
+    plt.subplot(212)
+    plt.plot(piste_1[0][0], 'bo', color='blue', label="piste 1")
+    plt.plot(piste_2[0][0], 'bo', color='red', label="piste 2")
+    plt.plot(radar[0], 'bo', color='yellow', label="radar")
+    if piste_nvx_2 != []:
+        plt.plot(piste_nvx_2[0][0], 'bo', color='black', label="nouvelle piste")
+        for i in range(1, len(piste_1)):
+            plt.plot(piste_1[i - 1][0], color='blue')
+            plt.plot(piste_1[i][0], 'bo', color='blue')
+        for i in range(1, len(piste_2)):
+            plt.plot(piste_2[i - 1][0], color='red')
+            plt.plot(piste_2[i][0], 'bo', color='red')
+
+    else:
+        for i in range(1, len(piste_1)):
+            plt.plot(piste_1[i - 1][0], color='blue')
+            plt.plot(piste_1[i][0], 'bo', color='blue')
+        for i in range(1, len(piste_2)):
+            plt.plot(piste_2[i - 1][0], color='red')
+            plt.plot(piste_2[i][0], 'bo', color='red')
+
+    plt.legend()
+    plt.grid()
+    plt.xlabel("abs")
+    plt.ylabel("ordonnées")
+    plt.title("situation N+1")
+    plt.show()
+    # fin visualisation
+    return piste_1, piste_2, piste_nvx_2
+
+
 if __name__ == "__main__":
     donnee = [4]
+    donnee_2 = [4.1]
     donnee_eclatee_au_sol = [20]
     k = 3  # nombre de voisins souhaité
 
@@ -171,7 +281,7 @@ if __name__ == "__main__":
                [2, 1]
                ]
     piste_2 = [[2, 2],
-               [4, 2],
+               [4.5, 2],
                [6, 2],
                [7, 2],
                [8, 2]]
@@ -182,7 +292,23 @@ if __name__ == "__main__":
                [3, 3],
                [4, 3]]
 
-    piste_1, piste_nvx, distance = suivi_1_cible(donnee_eclatee_au_sol, piste_1, 3)
-    piste_1, piste_nvx, distance = suivi_1_cible(donnee, piste_1, 3)
-    print(piste_1)
-    #print(piste_nvx) :  ne marche pas car écrasé par le deuxième appel de suivi_1_cible -> il faut passer sur un suivi de 2 cibles (if piste_nvx != [] : suivi_2_cible else : on enchaine 
+    print("let's start")
+    piste_1, piste_nvx, _ = suivi_1_cible(donnee, piste_1, 3)
+    print("piste 1 updated 1er tour", piste_1)
+    print("une deuxième piste ?", piste_nvx)
+    if piste_nvx:
+        print("deuxième tour")
+        # suivi de 2 cibles
+        piste_1, piste_nvx, nouvelle_piste, = suivi_2_cible(donnee_2, 3, piste_1, piste_nvx)
+        print("piste 1 updated 2eme tour", piste_1)
+        print("nouvelle piste initialisée", piste_nvx)
+        print("une troisième piste ?", nouvelle_piste)
+    else:
+        print("deuxième tour")
+        piste_1, piste_nvx, _ = suivi_1_cible(donnee_2, piste_1, 3)
+        print("piste 1 updated", piste_1)
+        print("une deuxième piste ?", piste_nvx)
+
+
+    #test avec 2 pistes
+    #piste_1, piste_2, nouvelle_piste = suivi_2_cible(donnee_eclatee_au_sol, 3, piste_1, piste_2)
