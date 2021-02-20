@@ -100,7 +100,7 @@ def ajout(data, donnee, classe_donnee):
     return data
 
 
-def suivi_1_cible(donnee, piste):
+def suivi_1_cible(donnee, piste, k):
     """on se donne en entrée la donnée à tester. On ne suit qu'une seule cible. il faut mettre en place une
     discrimination pour pouvoir créer une nouvelle piste si un plot est loin par rapport à un seuil déterminé il faut
     aussi pouvoir dropper cette piste si on ne détecte pas d'autre plots autour de ce dernier dans les 3 prochaines
@@ -307,5 +307,5 @@ if __name__ == "__main__":
                [4, 3, 3]]
 
     #suivi_2_cible(donnee, k, piste_1, piste_2)
-    suivi_1_cible(donnee_eclatee_au_sol, piste_3)
+    suivi_1_cible(donnee_eclatee_au_sol, piste_3,3)
 
