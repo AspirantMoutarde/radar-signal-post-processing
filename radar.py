@@ -42,13 +42,14 @@ def receivedSignalToMatrix(signal, Fsamp, Trec):
         - Trec : recurrence period
     output : Matrix of the received signal, each column is a listening time of Trec second
     """
+    signalCopy = signal.copy()
     N = Trec * Fsamp
     Npuls = len(signal) // N
     M = np.zeros((N, Npuls))
     for i in range(Npuls):
         for j in range(N):
-            M[j][i] = signal[0]
-            signal.pop([0])
+            M[j][i] = signalCopy[0]
+            signalCopy.pop([0])
     return M
 
 
