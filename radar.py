@@ -27,6 +27,7 @@ def rangeAmbiguity(SNR_value):
     return c / (2 * 1 / SNR_value)
 
 
+
 # Stationary target ####################################################################################################
 def timeDelayStationaryTarget(R0):
     """ for one single static target"""
