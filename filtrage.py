@@ -11,3 +11,25 @@ def intercorrelation(s,r):
     ax_orig.plot(s)
     ax_noise.plot(r)
     plt.show()
+
+
+def correlationMatrix(Me, Mr):
+    """
+    param :
+        - Me : pulses Matrix
+        - Mr : listening time Matrix
+    output : correlation Matrix
+    """
+    N, M = np.shape(Mr)
+    s = (Me.transpose()).tolist()
+    r = (Mr.transpose()).tolist()
+    i = []
+    for i in range(M):
+        i.append(signal.correlate(s[i], r[i]))
+    Mi = np.asarray(i)
+    return Mi
+
+
+
+
+
