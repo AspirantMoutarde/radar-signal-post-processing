@@ -9,6 +9,50 @@ import numpy as np
 c = 3E8
 
 
+# Signal formatting ####################################################################################################
+def ouverture(chemin):
+    """
+    Obsolete, prefer load
+    """
+    file = open(chemin, "r")
+    file.readline()
+    s = []
+    for line in file:
+        s.append(line)  # Ajout à la liste
+
+    for i in range(len(s)):
+        s[i] = int(s[i])  # On passe en entier
+    file.close()
+    signal = np.array(s)
+    return signal
+
+
+def load(chemin):
+    contenu = np.loadtxt(chemin)
+    S_emis = contenu[:, 0]
+    S_recu = contenu[:, 1]
+    return S_emis, S_recu
+
+
+def receivedSignalToMatrix(signal, Fsamp, Trec):
+    """
+    Param :
+        - signal : received signal (list of integers)
+        - Fech : sampling frequency
+        - Trec : recurrence period
+    output : Matrix of the received signal, each column is a listening time of Trec second
+    """
+    N = Trec * Fsamp
+    Npuls = len(signal) // N
+    M = np.zeros((N, Npuls))
+    for i in range(Npuls):
+        for j in range(N):
+            M[j][i] = signal[0]
+            signal.pop([0])
+    return M
+
+
+# Signal specificities #################################################################################################
 def radarPowerBudget(Pe, Ge, Gr, sigma, lbd, L, R):
     return (Pe * Ge * Gr * sigma * lbd ** 2) / (L * (4 * np.pi) ** 3 * R ** 4)
 
@@ -22,10 +66,11 @@ def SNR_N(N, Pe, Ge, Gr, sigma, lbd, tho, R, L, F, K, T0):
 
 
 def rangeAmbiguity(SNR_value):
-    """ Range ambiguity = confusion on range measurements
-    Two targets at different ranges can give the same range measurements """
+    """
+    Range ambiguity = confusion on range measurements
+    Two targets at different ranges can give the same range measurements
+    """
     return c / (2 * 1 / SNR_value)
-
 
 
 # Stationary target ####################################################################################################

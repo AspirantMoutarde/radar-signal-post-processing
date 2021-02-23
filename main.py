@@ -1,10 +1,11 @@
 import numpy as np
 
 
-from preTraitement import ouverture, load, decoupage
+
 from filtrage import intercorrelation
 from Detection import CFAR, plot_Cibles
 from position import distance
+from radar import *
 
 
 if __name__ == '__main__':
@@ -12,8 +13,8 @@ if __name__ == '__main__':
 
     """ 1 - Pré traitement / mise en forme du signal """
     # Ouverture de fichier
-    signal = ouverture("test1.txt")
-    S_emis, S_recu = load('acquisition.txt')
+    signal = ouverture("data/test1.txt")
+    S_emis, S_recu = load('data/acquisition.txt')
     x = np.arange(S_recu.size)
     fe = 15 * 10 ** 9
     Te = 1 / fe
