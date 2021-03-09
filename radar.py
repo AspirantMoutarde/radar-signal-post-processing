@@ -28,7 +28,7 @@ def ouverture(chemin):
 
 
 def load(chemin):
-    contenu = np.loadtxt(chemin)
+    contenu = np.loadtxt(chemin)-127.5
     S_emis = contenu[:, 0]
     S_recu = contenu[:, 1]
     return S_emis, S_recu
