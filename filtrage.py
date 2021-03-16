@@ -21,13 +21,13 @@ def correlationMatrix(Me, Mr):
     output : correlation Matrix
     """
     N, M = np.shape(Mr)
-    s = (Me.transpose()).tolist()
-    r = (Mr.transpose()).tolist()
-    i = []
+    s = Me.tolist()
+    r = Mr.tolist()
+    l = []
     for i in range(M):
-        i.append(signal.correlate(s[i], r[i]))
-    Mi = np.asarray(i)
-    return Mi
+        l.append(signal.correlate(s[i], r[i]))
+    Ml = np.asarray(l)
+    return Ml
 
 
 

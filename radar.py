@@ -45,10 +45,10 @@ def receivedSignalToMatrix(signal, Fsamp, Trec):
     signalCopy = signal.copy()
     N = Trec * Fsamp
     Npuls = len(signal) // N
-    M = np.zeros((N, Npuls))
-    for i in range(Npuls):
-        for j in range(N):
-            M[j][i] = signalCopy[0]
+    M = np.zeros((Npuls, N))
+    for i in range(N):
+        for j in range(Npuls):
+            M[i][j] = signalCopy[0]
             signalCopy.pop([0])
     return M
 

@@ -5,6 +5,7 @@ Implémentation d'un algorithme CFAR à moyenne
 import numpy as np
 import matplotlib.pyplot as plt
 
+
 def CFAR(signal, nb_entrainement, nb_garde, taux_fa):
     """
     :param signal: Données à traiter
@@ -48,6 +49,15 @@ def CFAR(signal, nb_entrainement, nb_garde, taux_fa):
     idx_pics = np.array(idx_pics, dtype=int)
     return idx_pics
 
+
+def MatrixCFAR(Mi, nb_entrainement, nb_garde, taux_fa):
+    N, M = np.shape(Mi)
+    lsignal = Mi.tolist()
+    lcibles = []
+    for i in range(lsignal):
+        lcibles.append(CFAR(lsignal[i], nb_entrainement, nb_garde, taux_fa))
+    Mcibles = np.asarray(lcibles)
+    return Mcibles
 
 
 def plot_Cibles(x, signal, idx_pics):

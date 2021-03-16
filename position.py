@@ -2,7 +2,9 @@
 Extarction de distances, position etc...
 @author: Janyl
 """
-def distance(frec, cibles):
+import numpy as np
+
+def distance(cibles, fsamp):
     """
     Détermination des distances cibles - radar
     :param frec: frequence d'échantillonnage
@@ -12,12 +14,21 @@ def distance(frec, cibles):
     c = 3E8
     Distances = []
     for i in cibles:
-        T = 1 / frec  # Période d'échantillonage
+        T = 1 / fsamp  # Période d'échantillonage
         Dt = cibles[i] = T  # Décallage temporel de l'écho due à la cible
         R = (c * abs(Dt)) / 2  # Distance cible - radar
         Distances.append(R)
 
     return Distances
+
+
+def MatrixDistance(Mcibles, fsamp):
+    lcibles = Mcibles.tolist()
+    ldistances = []
+    for i in range(lcibles):
+        ldistances.append(distance(lcibles[i], fsamp))
+    Mdistances = np.asarray(ldistances)
+    return Mdistances
 
 
 def coordonnees():
