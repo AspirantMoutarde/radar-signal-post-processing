@@ -7,7 +7,7 @@ import numpy as np
 def distance(cibles, fsamp):
     """
     Détermination des distances cibles - radar
-    :param frec: frequence d'échantillonnage
+    :param fsamp: frequence d'échantillonnage
     :param cibles: liste des cibles détectées (indices dans la listes du signal reçu)
     :return: distanbances de chaque cible au radar en mètres
     """
