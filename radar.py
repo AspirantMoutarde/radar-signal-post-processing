@@ -31,7 +31,8 @@ def load(chemin):
     contenu = np.loadtxt(chemin)-127.5
     S_emis = contenu[:, 0]
     S_recu = contenu[:, 1]
-    return S_emis, S_recu
+
+    return S_emis.tolist(), S_recu.tolist()
 
 
 def receivedSignalToMatrix(signal, Fsamp, Trec):
@@ -43,13 +44,16 @@ def receivedSignalToMatrix(signal, Fsamp, Trec):
     output : Matrix of the received signal, each column is a listening time of Trec second
     """
     signalCopy = signal.copy()
-    N = Trec * Fsamp
-    Npuls = len(signal) // N
+    N = int(Trec * Fsamp)
+
+
+    Npuls = int(len(signal) // N)
     M = np.zeros((Npuls, N))
-    for i in range(N):
-        for j in range(Npuls):
-            M[i][j] = signalCopy[0]
-            signalCopy.pop([0])
+
+    for i in range(Npuls):
+
+        for j in range(N):
+            M[i][j] = signalCopy[i*N+j]
     return M
 
 

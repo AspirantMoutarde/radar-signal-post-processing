@@ -51,17 +51,19 @@ def CFAR(signal, nb_entrainement, nb_garde, taux_fa):
 
 
 def MatrixCFAR(Mi, nb_entrainement, nb_garde, taux_fa):
-    N, M = np.shape(Mi)
-    lsignal = Mi.tolist()
+    N = np.shape(Mi)[0]
+
     lcibles = []
-    for i in range(lsignal):
-        lcibles.append(CFAR(lsignal[i], nb_entrainement, nb_garde, taux_fa))
+    for i in range(N):
+        lsignal = Mi[i]
+        lcibles.append(CFAR(lsignal, nb_entrainement, nb_garde, taux_fa))
     Mcibles = np.asarray(lcibles)
     return Mcibles
 
 
 def plot_Cibles(x, signal, idx_pics):
     print("idx_pics =", idx_pics)
+    print(x)
     plt.figure()
     plt.plot(x, signal)
     plt.plot(x[idx_pics], signal[idx_pics], 'rD')

@@ -21,11 +21,12 @@ def correlationMatrix(Me, Mr):
         - Mr : listening time Matrix
     output : correlation Matrix
     """
-    N, M = np.shape(Mr)
+    N = np.shape(Mr)[0]
+
     s = Me.tolist()
     r = Mr.tolist()
     lcorrelation = []
-    for i in range(M):
+    for i in range(N):
         lcorrelation.append(signal.correlate(s[i], r[i]))
     Ml = np.asarray(lcorrelation)
     return Ml
