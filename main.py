@@ -1,6 +1,7 @@
 
 import numpy as np
 from Detection import *
+from knn_1D import *
 from position import *
 from radar import *
 from filtrage import *
@@ -11,7 +12,7 @@ if __name__ == '__main__':
     # Données d'entrée à fournir
     path = 'data/chirp_perso.txt'
     fsamp = 1500e6
-    Trec = 260e-6
+    Trec = 699e-6
     nb_entrainement = 40000
     nb_garde = 10000
     taux_fa = 1e-6
@@ -45,6 +46,22 @@ if __name__ == '__main__':
     """ 4 - Extraction de la localisation"""
 
     MatrixDistances = MatrixDistance(MatrixCibles, fsamp)
-
+    print(MatrixDistances)
 
     """ 5 - Tracking """
+    jeu_test = MatrixDistances
+
+    piste_test = [[jeu_test[0][0], 6]]
+    data_t = [[jeu_test[0][1]], [jeu_test[0][2]]]
+    data_2_t = []
+    for i in range(3, len(jeu_test[0])):
+        data_2_t.append([jeu_test[0][i]])
+
+    print(data_2_t)
+
+    piste_maj_test, piste_nvx_t = algo_knn(piste_test, data_t, 1)
+
+    for i in range(0, len(data_2_t)):
+        piste_maj_test, piste_nvx = algo_knn(piste_maj_test, [data_2_t[i]], 3)
+
+    print(piste_maj_test)
