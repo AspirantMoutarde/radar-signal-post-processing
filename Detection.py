@@ -63,11 +63,20 @@ def MatrixCFAR(Mi, nb_entrainement, nb_garde, taux_fa):
 
 def plot_Cibles(x, signal, idx_pics):
     print("idx_pics =", idx_pics)
-    print(x)
+    print(type(signal))
+    print(type(idx_pics))
     plt.figure()
     plt.plot(x, signal)
-    plt.plot(x[idx_pics], signal[idx_pics], 'rD')
+    #plt.plot(x[idx_pics], signal[idx_pics], 'rD')
+    for i in range (len(idx_pics)):
+        point = idx_pics[i]
+        plt.plot(x[point], signal[point], 'rD')
     plt.xlabel('t')
     plt.ylabel('signal')
     plt.title('Cibles detectés')
     plt.show()
+
+
+
+
+

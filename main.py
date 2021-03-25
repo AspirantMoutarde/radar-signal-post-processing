@@ -12,8 +12,8 @@ if __name__ == '__main__':
     path = 'data/chirp_perso.txt'
     fsamp = 1500e6
     Trec = 260e-6
-    nb_entrainement = 100
-    nb_garde = 25
+    nb_entrainement = 40000
+    nb_garde = 10000
     taux_fa = 1e-6
 
     # Ouverture de fichier
@@ -39,12 +39,12 @@ if __name__ == '__main__':
     """ 3 - Detection """
 
     MatrixCibles = MatrixCFAR(MatrixSi, nb_entrainement, nb_garde, taux_fa)
-    #print(MatrixCibles)
+    print(type(MatrixCibles))
     plot_Cibles(list(range(len(MatrixSi[0].tolist()))), MatrixSi[0].tolist(), MatrixCibles[0].tolist())
 
     """ 4 - Extraction de la localisation"""
 
     MatrixDistances = MatrixDistance(MatrixCibles, fsamp)
-    print(MatrixDistances)
+
 
     """ 5 - Tracking """
