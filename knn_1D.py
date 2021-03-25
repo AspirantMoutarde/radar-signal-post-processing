@@ -15,11 +15,22 @@ def distance_eucl(donnee, d):
     return distance
 
 
+def calcul_seuil(vitesse, duree):
+    """calcul du seuil pour l'algorithme suivant la vitesse de déplacement de l'objet et le temps entre
+    2 acquisitions (on fait les mesures en "discret")
+    si la distance est supérieure au seuil : l'objet se déplace plus vite que celui traqué ou il s'agit d'un objet totalement different
+    il y a de forte chance que se soit une autre cible """
+    seuil = (vitesse * duree) + 2  # données parfaites
+    # seuil = 0.01 : acquisition réelle
+    return seuil
+
+
 def trouver_voisins(data, donnee, nb_voisins):
     """data: liste : ensemble de donnee à tester, d in data est de la forme [y,piste]
     donnee est la donnée testée de la forme [y]
     nb_voisins = k = nb de voisins souhaités
-    on gère aussi la création d'une nouvelle piste si les distance aux k plus proches voisins sont trop grandes """
+    on gère aussi la création d'une nouvelle piste si les distance aux k plus proches voisins sont trop grandes
+     c'est dans cette fonction que l'on définit le seuil"""
     distances = []
     for d in data:
         dist = distance_eucl(donnee, d)
@@ -28,8 +39,8 @@ def trouver_voisins(data, donnee, nb_voisins):
     distances.sort(key=lambda tup: tup[1])
     voisins = []
 
-    # vérification distances
-    seuil = 5
+    # vérification distances # on change le seuil ici !
+    seuil = calcul_seuil(2, 2)
     cpt = 0
     for i in range(nb_voisins):
         if np.abs(distances[i][1]) > seuil:
@@ -45,7 +56,6 @@ def trouver_voisins(data, donnee, nb_voisins):
     # voisins.append(distances[i][0])
 
     # on renvoit les k plus proches voisins de la donnée testée
-    print("voisins:", voisins)
     return voisins
 
 
@@ -99,7 +109,7 @@ def suivi_1_cible(donnee, piste, k):
     # prediction
     classe_donnee = prediction_classe(piste, donnee, k)
 
-    # nouvelle piste au cas ou on en ait besion
+    # nouvelle piste au cas ou on en ait besoin
     piste_nvx = []
 
     if classe_donnee != 100:
@@ -154,8 +164,8 @@ def suivi_1_cible(donnee, piste, k):
         plt.ylabel("ordonnées")
         plt.title("situation N+1")
 
-    return piste, piste_nvx, distance_donne_precedent
     plt.show()
+    return piste, piste_nvx, distance_donne_precedent
 
 
 def suivi_2_cible(donnee, k, piste_1, piste_2):
@@ -232,7 +242,7 @@ def suivi_2_cible(donnee, k, piste_1, piste_2):
     distance_cible_radar = distance_eucl(donnee, radar)
 
     print("le nouveau point est à :", distance_cible_radar, "m du radar")
-    print("le point c'est déplacé de:", distance_donne_precedent,
+    print("le point s'est déplacé de:", distance_donne_precedent,
           "m entre son emplacement précédent et son emplacement actuel")
 
     # visualisation après méthode des knn
@@ -267,11 +277,105 @@ def suivi_2_cible(donnee, k, piste_1, piste_2):
     return piste_1, piste_2, piste_nvx_2
 
 
+def un_tour_2_cibles(nb_iter, piste_1, piste_nvx, liste_donnees, n, cpt_1, cpt_2, k):
+    if nb_iter >= 0:
+
+        print(n+1, "ème tour avec 2 pistes")
+        # suivi de 2 cibles
+        piste_1_prec = piste_1
+        piste_2_prec = piste_nvx
+        piste_1, piste_nvx, nouvelle_piste, = suivi_2_cible(liste_donnees[n], k, piste_1, piste_nvx)
+        print("piste 1 updated 2eme tour", piste_1)
+        print("nouvelle piste initialisée", piste_nvx)
+        print("une troisième piste ?", nouvelle_piste)
+
+        # test si oui ou non drop
+        if piste_1_prec == piste_1:
+            cpt_1 += 1
+            if cpt_1 == 4:
+                print("la piste 1 n'a pas été mise à jour depuis 4 tours : DROP")
+
+        if piste_2_prec == piste_2:
+            cpt_2 += 1
+            if cpt_2 == 4:
+                print("la piste 2 n'a pas été mise à jour depuis 4 tours : DROP")
+
+        piste_1_prec = piste_1
+        piste_2_prec = piste_nvx
+
+        n += 1
+        nb_iter = nb_iter - n
+
+        return nb_iter, piste_1, piste_nvx, liste_donnees, n, cpt_1, cpt_2, nouvelle_piste
+
+    else:
+        print("plus de données")
+
+
+def un_tour_1_cible(nb_iter, piste_1, liste_donnees, n):
+
+    if nb_iter >= 0:
+        # on a 1 piste
+        print(n+1, "ème tour avec 1 piste")
+        piste_1, piste_nvx, _ = suivi_1_cible(liste_donnees[n], piste_1, 3)
+        print("piste 1 updated", piste_1)
+        print("une deuxième piste ?", piste_nvx)
+
+        n += 1
+        nb_iter = nb_iter - n
+
+        return nb_iter, piste_1, liste_donnees, n, piste_nvx
+
+    else:
+        print("plus de données")
+
+
+def algo_knn(piste_1, liste_donnees):
+    """on suit l'objet qui a laissé piste_1 comme trace
+    liste_donnees est la liste de toutes les données récupérées et traitées après acquisition"""
+
+    k = 3  # nombre de voisins par défaut
+    nb_iter = len(liste_donnees)
+    cpt_1 = 0
+    cpt_2 = 0
+    n = 0
+    print("on effectue ", nb_iter, " tours d'algo")
+    print("let's start")
+
+    nb_iter, piste_1, liste_donnees, n, piste_nvx = un_tour_1_cible(nb_iter, piste_1, liste_donnees, n)
+
+    # différenciation des cas : 1 ou 2 pistes
+    if piste_nvx:
+        # on a initialisé une 2eme piste
+        k = 3
+        nb_iter, piste_1, piste_nvx, liste_donnees, n, cpt_1, cpt_2,_ = un_tour_2_cibles(nb_iter, piste_1, piste_nvx,
+                                                                                       liste_donnees, n, cpt_1, cpt_2, k)
+        # 3eme tour
+        k = 3
+        # on réduit l'étude et on suppose que l'on ne suit pas plus de 2 cibles en même temps
+        nb_iter, piste_1, piste_nvx, liste_donnees, n, cpt_1, cpt_2, _ = un_tour_2_cibles(nb_iter, piste_1, piste_nvx,
+                                                                                          liste_donnees, n, cpt_1,
+                                                                                          cpt_2, k)
+
+
+    else:
+        nb_iter, piste_1, liste_donnees, n, piste_nvx = un_tour_1_cible(nb_iter, piste_1, liste_donnees, n)
+        # 3eme tour
+        if piste_nvx:
+            k = 3
+            nb_iter, piste_1, piste_nvx, liste_donnees, n, cpt_1, cpt_2, _ = un_tour_2_cibles(nb_iter, piste_1,
+                                                                                              piste_nvx,
+                                                                                              liste_donnees, n, cpt_1,
+                                                                                              cpt_2, k)
+        else:
+            nb_iter, piste_1, liste_donnees, n, piste_nvx = un_tour_1_cible(nb_iter, piste_1, liste_donnees, n)
+
+
 if __name__ == "__main__":
     donnee = [4]
     donnee_2 = [4.1]
     donnee_eclatee_au_sol = [20]
-    k = 3  # nombre de voisins souhaité
+    data = [[4], [6.4], [5]]
 
     # on suppose que les pistes sont "triées" dans l'ordre d'apparition des plots dans cette dernière
     piste_1 = [[7, 1],
@@ -292,23 +396,7 @@ if __name__ == "__main__":
                [3, 3],
                [4, 3]]
 
-    print("let's start")
-    piste_1, piste_nvx, _ = suivi_1_cible(donnee, piste_1, 3)
-    print("piste 1 updated 1er tour", piste_1)
-    print("une deuxième piste ?", piste_nvx)
-    if piste_nvx:
-        print("deuxième tour")
-        # suivi de 2 cibles
-        piste_1, piste_nvx, nouvelle_piste, = suivi_2_cible(donnee_2, 3, piste_1, piste_nvx)
-        print("piste 1 updated 2eme tour", piste_1)
-        print("nouvelle piste initialisée", piste_nvx)
-        print("une troisième piste ?", nouvelle_piste)
-    else:
-        print("deuxième tour")
-        piste_1, piste_nvx, _ = suivi_1_cible(donnee_2, piste_1, 3)
-        print("piste 1 updated", piste_1)
-        print("une deuxième piste ?", piste_nvx)
+    algo_knn(piste_2, data)
 
-
-    #test avec 2 pistes
-    #piste_1, piste_2, nouvelle_piste = suivi_2_cible(donnee_eclatee_au_sol, 3, piste_1, piste_2)
+    # test avec 2 pistes
+    # piste_1, piste_2, nouvelle_piste = suivi_2_cible(donnee_eclatee_au_sol, 3, piste_1, piste_2)
